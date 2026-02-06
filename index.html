@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <title>TimeCapsuleCalendar</title>
+  <link rel="manifest" href="manifest.json" />
+
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="theme-color" content="#6366f1" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+
+</head>
+<body>
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">
+        <img src="assets/icons/app-logo.png" alt="App Logo" />
+      </div>
+      <div>
+        <h1>TimeCapsuleCalendar</h1>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn" id="btnTheme" title="夜间模式">🌗 夜间</button>
+    </div>
+  </div>
+
+  <div id="bannerArea"></div>
+
+<div id="viewCalendar" class="view">
+  <div id="todayMessageArea"></div>
+  <div class="card">
+    <div class="section">
+      <div class="calendar-controls compact">
+        <div class="row">
+          <button class="btn" id="prevMonth">⬅ 上月</button>
+          <button class="btn" id="nextMonth">下月 ➡</button>
+        </div>
+        <div class="row" style="flex:1; justify-content:flex-end;">
+          <div class="row" style="min-width:min(520px, 100%);">
+            <div style="flex:1; min-width: 140px;">
+              <select class="select" id="monthSelect"></select>
+            </div>
+            <div style="width: 130px;">
+              <input class="input" id="yearInput" inputmode="numeric" pattern="[0-9]*" placeholder="年份" />
+            </div>
+            <button class="btn primary" id="jumpToday">今天</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cal">
+        <div class="dow">
+          <div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div>
+        </div>
+        <div class="cells" id="calendarCells"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-hd">
+        <h2>日期详情</h2>
+        <div class="kpi">
+          <span class="badge" id="selectedInfo">选择一个日期</span>
+        </div>
+      </div>
+
+      <div class="detail-date">
+        <div>
+          <div class="muted" style="font-size:12px;">选中日期</div>
+          <div class="date" id="selectedDateText">-</div>
+        </div>
+        <div class="row">
+          <button class="btn" id="btnEditMsg">编辑</button>
+          <button class="btn green hidden" id="btnSaveMsg">保存</button>
+        </div>
+      </div>
+
+      <div class="section-bd">
+        <div id="msgViewArea"></div>
+
+        <div class="sep"></div>
+
+        <div class="row stack">
+          <div class="row">
+            <button class="btn primary" id="btnGenOne">生成一句</button>
+            <button class="btn danger" id="btnDeleteMsg">删除</button>
+          </div>
+          <div class="hint">
+            说明：生成会使用内置寄语池随机写入，并覆盖当天原寄语。你也可以进入编辑模式手动保存。
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="viewSurprise" class="view hidden">
+  <div class="card">
+    <div class="section">
+      <div class="section-hd">
+        <h2>抽签</h2>
+        <div class="kpi">
+          <span class="badge" id="drawMoodBadge">当前：全部</span>
+        </div>
+      </div>
+      <div class="section-bd">
+        <div class="row">
+          <button class="btn primary" id="btnDraw">抽签</button>
+          <button class="btn" id="btnMailbox">📬 解忧信箱</button>
+        </div>
+
+        <div class="chips hidden" id="mailboxTags"></div>
+        <div class="hint" id="mailboxHint">选择情绪标签，马上收到一封解忧信。</div>
+
+        <div class="sep"></div>
+
+        <div class="item" id="drawCard">
+          <div class="top">
+            <div>
+              <div style="font-weight:900; letter-spacing:.2px;">签卡</div>
+              <div class="meta" id="drawCardMeta">还没有抽签</div>
+            </div>
+          </div>
+          <div class="text" id="drawCardText">点一下「抽签」，签就会跳出来。</div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="row stack">
+          <button class="btn green" id="btnWriteToDate">一键写入选中日期寄语</button>
+          <button class="btn" id="btnSaveDraw">保存到抽签记录</button>
+          <div class="hint">
+            说明：写入会把当前签卡文本覆盖写入「当前选中日期」的寄语，并自动记录到抽签历史（writtenToDate 会写入日期）。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-hd">
+        <h2>抽签历史</h2>
+        <div class="kpi">
+          <span class="badge" id="drawCount">0 条</span>
+        </div>
+      </div>
+      <div class="section-bd">
+        <div class="row">
+          <input class="input" id="drawFilter" placeholder="搜索历史（关键词）" />
+        </div>
+        <div class="sep"></div>
+        <div class="list" id="drawHistory"></div>
+        <div class="hint" style="margin-top:10px;">
+          小提示：删除历史只影响记录，不会回滚你已经写入到日历的寄语。
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-hd">
+        <h2>时间胶囊</h2>
+        <div class="kpi">
+          <span class="badge" id="giftCount">0 封</span>
+        </div>
+      </div>
+      <div class="section-bd">
+        <div class="timeline" id="giftGrid"></div>
+        <div class="hint" style="margin-top:10px;">
+          未到日期会显示封蜡。到期后点击信封即可打开。
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<div id="viewJournal" class="view hidden">
+  <div class="card">
+    <div class="section">
+      <div class="section-hd">
+        <h2>日记</h2>
+        <div class="kpi">
+          <span class="badge" id="jnlDateBadge">-</span>
+        </div>
+      </div>
+      <div class="section-bd">
+        <div class="row" style="align-items:flex-end;">
+          <div style="flex:1;">
+            <div class="muted" style="font-size:12px; font-weight:900; margin-bottom:6px;">日期</div>
+            <div class="badge" id="jnlDateText">-</div>
+          </div>
+          <div class="row">
+            <button class="btn" id="btnSaveJnl">保存日记</button>
+            <button class="btn danger" id="btnDeleteJnl">删除日记</button>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="muted" style="font-size:12px; font-weight:900; margin-bottom:6px;">正文</div>
+        <textarea class="textarea" id="jnlText" placeholder="写长一点也没关系。"></textarea>
+
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-hd">
+        <h2>搜索</h2>
+        <div class="kpi">
+          <span class="badge">寄语 + 日记</span>
+        </div>
+      </div>
+      <div class="section-bd">
+        <div class="row">
+          <input class="input" id="searchInput" placeholder="关键词，例如：失眠 / 想你 / 考试" />
+          <button class="btn primary" id="btnSearch">搜索</button>
+        </div>
+        <div class="sep"></div>
+        <div class="list" id="searchResults"></div>
+        <div class="hint" style="margin-top:10px;">
+          点搜索结果会跳转并选中对应日期。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="viewSettings" class="view hidden">
+  <div class="card">
+    <div class="section">
+      <div class="section-hd">
+        <h2>备份与数据</h2>
+        <div class="kpi">
+          <span class="badge" id="storageBadge">localStorage</span>
+        </div>
+      </div>
+      <div class="section-bd">
+        <div class="row stack">
+          <button class="btn primary" id="btnExport">导出备份 JSON</button>
+
+          <div class="item">
+            <div style="font-weight:900;">导入 JSON</div>
+            <div class="meta">选择文件后会立即解析。导入规则见「帮助/说明」。</div>
+            <div style="height:10px"></div>
+            <div class="row">
+              <select class="select" id="importMode">
+                <option value="replace">覆盖（replace）</option>
+                <option value="merge">合并（merge）</option>
+              </select>
+            </div>
+            <div style="height:10px"></div>
+            <div class="row">
+              <input type="file" id="importFile" accept="application/json,.json" class="input" />
+            </div>
+            <div class="hint" style="margin-top:10px;">
+              提醒：导入失败不会修改现有数据（解析成功后才写入）。
+            </div>
+          </div>
+
+          <button class="btn" id="btnClearTest">清除测试内容</button>
+
+          <button class="btn danger" id="btnWipeAll">一键清空所有数据</button>
+          <div class="hint">
+            清空会删除本机全部数据（寄语/日记/抽签历史/礼物/签池等）。会要求二次确认。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-hd">
+        <h2>主题</h2>
+        <div class="kpi">
+          <span class="badge" id="themeBadge">-</span>
+        </div>
+      </div>
+      <div class="section-bd">
+        <div class="row">
+          <div style="flex:1; min-width: 160px;">
+            <div class="muted" style="font-size:12px; font-weight:900; margin-bottom:6px;">季节</div>
+            <select class="select" id="themeSeason">
+              <option value="winter">冬季 / 默认</option>
+              <option value="spring">春季</option>
+              <option value="summer">夏季</option>
+              <option value="autumn">秋季</option>
+            </select>
+          </div>
+          <div style="flex:1; min-width: 160px;">
+            <div class="muted" style="font-size:12px; font-weight:900; margin-bottom:6px;">时间</div>
+            <select class="select" id="themeTime">
+              <option value="auto">默认</option>
+              <option value="sunset">日落</option>
+              <option value="night">夜间</option>
+            </select>
+          </div>
+        </div>
+        <div class="hint" style="margin-top:10px;">
+          夜间/日落会覆盖季节色。
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-hd">
+        <h2>状态</h2>
+        <div class="kpi">
+          <span class="badge" id="metaBadge">-</span>
+        </div>
+      </div>
+      <div class="section-bd">
+        <div class="list" id="statusList"></div>
+        <div class="sep"></div>
+        <div class="hint">
+          本应用仅使用浏览器本地存储。浏览器清理数据、无痕模式、或系统策略都可能导致数据被清空。请定期导出备份 JSON。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="viewHelp" class="view hidden">
+    <div class="card">
+      <div class="hd">
+        <h2>帮助/说明</h2>
+        <div class="kpi">
+          <span class="badge">schema · 导入规则 · 提醒限制</span>
+        </div>
+      </div>
+      <div class="bd">
+        <div class="item">
+          <div style="font-weight:900;">核心规则（简明）</div>
+          <div class="text">
+1) 数据都存在本地（localStorage）。关掉网页再开不会丢。
+2) 「生成一句 / 再来一句」会从内置寄语池随机抽取，并覆盖写入当天寄语。
+3) 抽签支持按情绪分类。抽到后可「保存到历史」，也可「一键写入选中日期寄语」（写入也会记录到历史）。
+4) 导出会生成一个完整 JSON 备份文件。导入支持 覆盖 或 合并。
+5) 离线单页无法后台定时通知：本应用的提醒是「打开网页时提示」。
+          </div>
+        </div>
+
+        <div class="item">
+          <div style="font-weight:900;">数据 Schema（示例）</div>
+          <div class="meta">你可以扩展字段，但不会删掉核心字段。</div>
+          <div style="height:10px"></div>
+          <div class="mono" id="schemaBlock"></div>
+        </div>
+
+        <div class="item">
+          <div style="font-weight:900;">导入规则</div>
+          <div class="text">
+覆盖（replace）：
+- 导入 JSON 完全替换本地数据。
+
+合并（merge）：
+- calendar/journal：按日期键合并。同一天冲突时，优先保留 updatedAt 更新更晚的一条；若缺少 updatedAt，则导入数据覆盖本地。
+- lots：按 id 合并。同 id 冲突时，导入条目覆盖本地条目（便于用备份修正签池）。
+- draws：追加合并，按 (at + mood + text + writtenToDate) 去重。
+- gifts：按年份合并。同年份冲突时，导入覆盖本地（以备份为准）。
+
+导入后会提示：成功/失败，写入条数。
+          </div>
+        </div>
+
+        <div class="item">
+          <div style="font-weight:900;">清除测试内容规则</div>
+          <div class="text">
+- 只删除内置明显测试条目（包含“【测试】”且来源不是 manual 的寄语/签/记录/礼物），尽量不碰你手写的内容。
+- 如果你自己也写了“【测试】”并且 source=manual，本按钮不会删除它。
+          </div>
+        </div>
+
+        <div class="item">
+          <div style="font-weight:900;">提醒限制</div>
+          <div class="text">
+- 单文件离线网页无法保证后台准时弹通知。
+- 本应用在你打开网页时检查：
+  a) 今天是否有寄语/日记
+  b) 是否有礼物内容
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-reader hidden" id="letterModal">
+    <div class="modal-backdrop" id="letterModalBackdrop"></div>
+    <div class="modal-paper" id="letterModalPaper">
+      <div class="modal-head">
+        <div>
+          <h2 id="letterModalTitle">来信</h2>
+          <div class="meta" id="letterModalMeta">-</div>
+        </div>
+        <button class="btn tiny" id="letterModalClose">关闭</button>
+      </div>
+      <div class="modal-body message-view" id="letterModalContent">-</div>
+    </div>
+  </div>
+
+  <div class="modal-tool hidden" id="giftEditorModal">
+    <div class="modal-backdrop" id="giftEditorBackdrop"></div>
+    <div class="modal-paper modal-form" id="giftEditorPaper">
+      <div class="modal-head">
+        <div>
+          <h2>胶囊编辑</h2>
+          <div class="meta" id="giftEditBadge">未选择</div>
+        </div>
+        <button class="btn tiny" id="giftEditorClose">关闭</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row">
+          <div style="flex:1; min-width: 140px;">
+            <div class="muted" style="font-size:12px; font-weight:900; margin-bottom:6px;">年份</div>
+            <input class="input" id="giftYearInput" placeholder="YYYY" inputmode="numeric" pattern="[0-9]*" />
+          </div>
+          <div style="flex:1; min-width: 180px;">
+            <div class="muted" style="font-size:12px; font-weight:900; margin-bottom:6px;">解锁日期</div>
+            <input class="input" id="giftOpenDate" placeholder="YYYY-MM-DD" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div style="flex:1; min-width: 160px;">
+            <div class="muted" style="font-size:12px; font-weight:900; margin-bottom:6px;">信封样式</div>
+            <select class="select" id="giftStyle">
+              <option value="kraft">牛皮纸</option>
+              <option value="airmail">航空信</option>
+              <option value="ivory">象牙纸</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="muted" style="font-size:12px; font-weight:900; margin-bottom:6px;">内容</div>
+        <textarea class="textarea" id="giftContent" placeholder="写下这封时间胶囊的内容..."></textarea>
+
+        <div class="row">
+          <button class="btn primary" id="btnGiftSave">保存</button>
+          <button class="btn" id="btnGiftNew">清空</button>
+          <button class="btn danger" id="btnGiftDelete">删除</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tabbar">
+  <div class="tabs">
+    <div class="tab active" data-tab="calendar">
+      <div class="ico"><img src="assets/icons/tab-calendar.png" alt="日历" /></div>
+      <div>日历</div>
+      <div class="dot-red" id="dotCalendar"></div>
+    </div>
+    <div class="tab" data-tab="surprise">
+      <div class="ico"><img src="assets/icons/tab-surprise.png" alt="惊喜" /></div>
+      <div>惊喜</div>
+      <div class="dot-red" id="dotSurprise"></div>
+    </div>
+    <div class="tab" data-tab="journal">
+      <div class="ico"><img src="assets/icons/tab-journal.png" alt="日记" /></div>
+      <div>日记</div>
+      <div class="dot-red" id="dotJournal"></div>
+    </div>
+    <div class="tab" data-tab="settings">
+      <div class="ico"><img src="assets/icons/tab-settings.png" alt="设置" /></div>
+      <div>设置</div>
+      <div class="dot-red" id="dotSettings"></div>
+    </div>
+  </div>
+</div>
+
+
+<div class="toast" id="toast">
+  <div class="t" id="toastText">-</div>
+  <div class="a" id="toastActions"></div>
+</div>
+<script>
+  // 注册 Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('PWA Service Worker 注册成功', reg))
+        .catch(err => console.log('PWA Service Worker 注册失败', err));
+    });
+  }
+</script>
+  <script src="app.js" defer></script>
+</body>
+</html>

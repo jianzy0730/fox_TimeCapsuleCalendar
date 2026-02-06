@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "app": "TimeCapsuleCalendar",
+    "version": 1,
+    "exportedAt": "2026-02-05T12:34:56.789Z"
+  },
+  "calendar": {
+    "2026-02-05": {
+      "message": "寄语文本",
+      "updatedAt": "2026-02-05T12:00:00.000Z",
+      "source": "manual|generated|imported|lot"
+    }
+  },
+  "journal": {
+    "2026-02-05": {
+      "text": "日记/回信",
+      "tags": ["失眠", "考试"],
+      "updatedAt": "2026-02-05T12:00:00.000Z"
+    }
+  },
+  "lots": {
+    "default": [{ "id": "t1", "text": "【测试】...", "tags": ["想她"] }],
+    "moods": {
+      "困": [{ "id": "...", "text": "...", "tags": ["困"] }],
+      "焦虑": [],
+      "想她": [],
+      "需要被哄": [],
+      "开心": []
+    }
+  },
+  "draws": [
+    {
+      "at": "2026-02-05T12:00:00.000Z",
+      "mood": "想她",
+      "text": "抽到的签内容",
+      "writtenToDate": "2026-02-05"
+    }
+  ],
+  "gifts": {
+    "yearly": {
+      "2030": { "openDate": "2030-05-01", "locked": true, "content": "礼物正文" }
+    },
+    "hints": {
+      "2030": ["线索1", "线索2", "线索3", "线索4", "线索5", "线索6", "线索7"]
+    }
+  }
+}
